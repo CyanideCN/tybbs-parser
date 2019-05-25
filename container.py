@@ -7,8 +7,6 @@ from io import BytesIO
 
 import requests
 
-from log import logger
-
 CACHE_DIR = os.path.join(os.path.dirname(__file__), 'cache')
 
 @dataclass
@@ -35,14 +33,12 @@ class Floor(_Floor):
             os.mkdir(target_dir)
         for idx, url in enumerate(self.pic):
             ext_name = url.split('.')[-1]
-            target_fn = '_'.join([self.serial, str(idx)]) + ext_name # File format to be determined
+            target_fn = '_'.join([self.serial, str(idx)]) + '.' + ext_name
             pic_fn = join(target_dir, target_fn)
             if exists(pic_fn):
-                with open(pic_fn, 'rb') as buf:
-                    img_list.append(buf)
-                logger.debug('Picture found at {}'.format(pic_fn))
+                f = open(pic_fn, 'rb')
+                img_list.append(f)
             else:
-                logger.debug('Download picture ... {}'.format(url))
                 req = requests.get(url)
                 # Success check?
                 img_list.append(BytesIO(req.content))
