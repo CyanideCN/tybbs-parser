@@ -78,11 +78,16 @@ class Thread(object):
         for f in ff:
             quote_t = f.find_all('blockquote')
             if quote_t:
-                if hasattr(quote_t[0].next_element, 'contents'):
-                    quote_list.append((quote_t[0].next_element.contents[0].contents[0],
-                                       quote_t[0].next_element.contents[-1]))
+                if not hasattr(quote_t[0].next_element, 'contents'):
+                    raw_quote = parse_text(quote_t[0].contents)
+                    quote_list.append(('Quote', ''.join([i for i in raw_quote if isinstance(i, (str, NavigableString))])))
                 else:
-                    quote_list.append(('Quote', ''.join(parse_text(quote_t[0].contents))))
+                    if not quote_t[0].next_element.contents:
+                        raw_quote = parse_text(quote_t[0].contents)
+                        quote_list.append(('Quote', ''.join([i for i in raw_quote if isinstance(i, (str, NavigableString))])))
+                    else:
+                        quote_list.append((quote_t[0].next_element.contents[0].contents[0],
+                                           quote_t[0].next_element.contents[-1]))
             else:
                 quote_list.append(None)
 

@@ -26,6 +26,9 @@ class Floor(_Floor):
     def download_pic(self) -> list:
         if not self.pic:
             return
+        self.pic = [i for i in self.pic if i]
+        if not self.pic:
+            return
         tid = self.floor_info['tid']
         img_list = list()
         target_dir = join(CACHE_DIR, str(tid))
@@ -39,10 +42,20 @@ class Floor(_Floor):
                 f = open(pic_fn, 'rb')
                 img_list.append(f)
             else:
-                req = requests.get(url)
+                try:
+                    req = requests.get(url)
+                except Exception:
+                    print('Download {} failed'.format(url))
+                    img_list.append(BytesIO())
+                    continue
                 # Success check?
                 img_list.append(BytesIO(req.content))
-                f = open(pic_fn, 'wb')
+                try:
+                    f = open(pic_fn, 'wb')
+                except Exception:
+                    print('Create file {} failed'.format(pic_fn))
+                    img_list.append(BytesIO())
+                    continue
                 f.write(req.content)
                 f.close()
         return img_list
